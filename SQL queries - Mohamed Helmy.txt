@@ -1,0 +1,62 @@
+/* Query 1 */
+WITH T1 AS
+  (SELECT strftime('%Y', i.InvoiceDate) YEAR,
+                                        g.Name genre,
+                                        SUM(il.UnitPrice*il.Quantity) sales
+   FROM Genre g
+   JOIN Track t ON g.GenreId = t.GenreId
+   JOIN InvoiceLine il ON t.TrackId = il.TrackId
+   JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+   GROUP BY 1,
+            2
+   ORDER BY 1 ASC, 3 DESC)
+SELECT YEAR,
+       genre,
+       MAX(sales)
+FROM T1
+GROUP BY 1
+ORDER BY 1 ASC;
+
+
+/* Query 2 */
+WITH emp_cus AS
+  (SELECT strftime('%Y', i.invoiceDate) YEAR,
+                                        e.FirstName emp_first_name,
+                                        e.LastName emp_last_name,
+                                        e.Country country,
+                                        COUNT(*) num_of_customers
+   FROM Employee e
+   JOIN Customer c ON e.EmployeeId = c.SupportRepId
+   JOIN Invoice i ON c.CustomerId = i.CustomerId
+   GROUP BY 1,
+            2,
+            3
+   ORDER BY 1 ASC, 5 DESC)
+SELECT YEAR,
+       emp_first_name,
+       emp_last_name,
+       country,
+       MAX(num_of_customers) customers_helped
+FROM emp_cus
+GROUP BY 1
+ORDER BY 1 ASC;
+
+
+/* Query 3 */
+SELECT i.BillingCountry country,
+       SUM((il.UnitPrice*il.Quantity)) total_spent
+FROM Invoice i
+JOIN InvoiceLine il ON i.InvoiceId = il.InvoiceId
+GROUP BY 1
+ORDER BY 2 DESC;
+
+
+/* Query 4 */
+SELECT strftime('%Y', i.InvoiceDate) YEAR,
+                                     AVG(t.Milliseconds) avg_len_milliseconds
+FROM Track t
+JOIN InvoiceLine il ON t.TrackId = il.TrackId
+JOIN Invoice i ON il.InvoiceId = i.InvoiceId
+GROUP BY 1
+ORDER BY 1 ASC;
+
